@@ -7,4 +7,5 @@ urlpatterns = [
     path("", views.all_users, name="all users"),
     path("<int:user_id>/", views.user_by_id, name="user by id"),
     path("login/", views.login, name="login"),
+    path("validate/", views.validate, name="validate"),
 ]
