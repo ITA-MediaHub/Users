@@ -99,7 +99,20 @@ def user_by_id(request, user_id):
         return JsonResponse({"message": "Sucessfully updated user.", "user": {"user_id": user.id, "username": user.username}}, status=200)
 
     elif request.method == "DELETE":
-        return HttpResponse(f"Deleting user {user_id}") #TODO
+        token_claims = validate_token(extract_auth_token(request))
+        if token_claims is None:
+            return JsonResponse({"error": "Invalid authorization token"}, status=401)
+        
+        if token_claims["user_id"] != user_id:
+            return JsonResponse({"error": "Not allowed to delete this user"}, status=403)
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User with given ID does not exist."}, status=404)
+        
+        user.delete()
+        return JsonResponse({"message": "Successfully deleted user."}, status=200)
 
 def login(request):
     if request.content_type != "application/json":
@@ -110,8 +123,8 @@ def login(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON in request body"}, status=400)
     
-    username = request_content["username"]
-    password = request_content["password"]
+    username = request_content.get("username")
+    password = request_content.get("password")
     if username is None or password is None:
         return JsonResponse({"error": "Request body must contain username and password fields"}, status=400)
     

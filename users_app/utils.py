@@ -8,6 +8,9 @@ def validate_token(token):
         return None
 
 def extract_auth_token(request):
-    auth_header = request.headers["Authorization"]
-    token = auth_header.split(sep=" ")[1] # gets token from "Bearer xyz" formatted header
-    return token
+    try:
+        auth_header = request.headers["Authorization"]
+        token = auth_header.split(sep=" ")[1] # gets token from "Bearer xyz" formatted header
+        return token
+    except KeyError:
+        return None
