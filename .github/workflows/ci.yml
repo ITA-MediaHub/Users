@@ -5,4 +5,15 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "TODO"
+      - name: Checkout code from GitHub repository
+        uses: actions/checkout@v6.0.2
+      - name: Prepare environment (Python)
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: 3.14
+      - name: Install dependencies
+        run: pip install -r requirements.txt # or do I need to make a virtual environment? will see i guess
+      - name: Run tests
+        run: python manage.py test users_app
+        env:
+          JWT_SECRET: faketestsecret
