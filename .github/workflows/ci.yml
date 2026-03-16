@@ -17,3 +17,5 @@ jobs:
         run: python manage.py test users_app
         env:
           JWT_SECRET: faketestsecret
+          DJANGO_SECRET_KEY: somefakesecretkeythatstooshortprobablyormaybenot
+          DEBUG: false
