@@ -446,12 +446,33 @@ class TokenValidationTests(TestCase):
         self.assertTrue("error" in response_json)
 
     def test_non_json_content(self):
-        pass
+        """
+        View rejects requests without content type set to "application/json".
+        """
+        payload = {"token": get_invalid_token(1, "John")}
+        response = self.client.post(reverse("users_app:validate"), payload)
+        self.assertEqual(response.status_code, 400)
+        response_json = loads(response.content)
+        self.assertTrue("error" in response_json)
 
     def test_invalid_json_content(self):
-        pass
+        """
+        View rejects requests with invalid JSON content.
+        """
+        payload = "{\"username: John []]" #idk some nonsense
+        response = self.client.post(reverse("users_app:validate"), payload, "application/json")
+        self.assertEqual(response.status_code, 400)
+        response_json = loads(response.content)
+        self.assertTrue("error" in response_json)
 
     def test_no_token_field(self):
-        pass
+        """
+        If a request is sent without the "token" field, an error is returned.
+        """
+        payload = {"hello": "world"}
+        response = self.client.post(reverse("users_app:validate"), payload, "application/json")
+        self.assertEqual(response.status_code, 400)
+        response_json = loads(response.content)
+        self.assertTrue("error" in response_json)
 
     

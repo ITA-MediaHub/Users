@@ -152,7 +152,7 @@ def validate(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON in request body"}, status=400)
     
-    token = request_content["token"]
+    token = request_content.get("token")
     if token is None:
         return JsonResponse({"error": "Request body must contain token field"}, status=400)
     
