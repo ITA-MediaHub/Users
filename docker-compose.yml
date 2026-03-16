@@ -1,0 +1,17 @@
+services:
+  users:
+    build:
+      context: .
+      args:
+        DEBUG: False
+      secrets:
+        - django_secret_key
+    env_file:
+      - ./.env
+      - users_app/.env
+    ports:
+      - 8000:8000
+
+secrets:
+  django_secret_key:
+    environment: "DJANGO_SECRET_KEY"
