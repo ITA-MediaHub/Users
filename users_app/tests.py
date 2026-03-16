@@ -474,7 +474,3 @@ class TokenValidationTests(TestCase):
         self.assertEqual(response.status_code, 400)
         response_json = loads(response.content)
         self.assertTrue("error" in response_json)
-
-class FailingTest(TestCase): # purposefully failing test to check CI functionality
-    def test_failure(self):
-        self.assertEqual(2+2, 5)
