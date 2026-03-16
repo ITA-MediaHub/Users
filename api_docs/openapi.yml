@@ -1,0 +1,407 @@
+openapi: 3.1.0
+info:
+  title: MediaHub Users Service
+  description: MediaHub service for user management.
+  version: "1.0"
+tags:
+  - name: users
+    description: User management
+
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: Get all users.
+      description: Get list of users with their IDs and usernames.
+      operationId: getUsers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+    post:
+      tags:
+        - users
+      summary: Register new user.
+      description: Register a new user with the given username and password.
+      operationId: registerUser
+      requestBody:
+        description: Data for new user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationData'
+      responses:
+        '201':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    const: "Sucessfully registered user."
+                  user:
+                    $ref: "#/components/schemas/User"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                "Wrong content type":
+                  $ref: "#/components/examples/WrongContentType"
+                "Invalid JSON":
+                  $ref: "#/components/examples/InvalidJSON"
+                "Missing fields":
+                  value:
+                    error: "Request body must contain username and password fields"
+                "Already existing username":
+                  value:
+                    error: "User with that username already exists, please choose a different username."
+                "Too long username":
+                  value:
+                    error: "Username cannot be longer than 20 characters."
+
+  /users/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+        description: The user ID
+
+    get:
+      tags:
+        - users
+      summary: Get user by ID.
+      description: Get user by ID.
+      operationId: getUserById
+      responses:
+        '200':
+          description: Successfully retrieved User
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User with given ID does not exist."
+
+    put:
+      tags:
+        - users
+      summary: Edit user by ID.
+      description: Edit user by ID.
+      operationId: editUserById
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Bearer authentication token
+
+      requestBody:
+        description: User data to change
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationData"
+            examples:
+              Username:
+                value:
+                  username: "John"
+              Password:
+                value:
+                  password: "securepassword"
+              Both:
+                value:
+                  username: "John"
+                  password: "securepassword"
+
+      responses:
+        '200':
+          description: Successfully edited user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    const: "Sucessfully updated user."
+                  user:
+                    $ref: "#/components/schemas/User"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                "Wrong content type":
+                  $ref: "#/components/examples/WrongContentType"
+                "Invalid JSON":
+                  $ref: "#/components/examples/InvalidJSON"
+                "Missing fields":
+                  value:
+                    error: "Request body must contain at least one of 'username' and 'password' fields"
+                "Already existing username":
+                  value:
+                    error: "User with that username already exists, please choose a different username."
+                "Too long username":
+                  value:
+                    error: "Username cannot be longer than 20 characters."
+
+        '401':
+          description: Invalid authorization token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Invalid authorization token"
+
+        '403':
+          description: Forbidden operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Not allowed to modify this user"
+
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User with given ID does not exist."
+
+    delete:
+      tags:
+        - users
+      summary: Delete user by ID.
+      description: Delete user by ID.
+      operationId: deleteUserById
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+          description: Bearer authentication token
+
+      responses:
+        '200':
+          description: Successfully deleted user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    const: "Successfully deleted user."
+
+        '401':
+          description: Invalid authorization token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Invalid authorization token"
+
+        '403':
+          description: Forbidden operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Not allowed to delete this user"
+
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "User with given ID does not exist."
+
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Login user.
+      description: Authenticate user and receive a JWT token.
+      operationId: loginUser
+
+      requestBody:
+        required: true
+        description: Username and password
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationData"
+
+      responses:
+        '200':
+          description: Successfully logged in.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    const: "Sucessfully logged in."
+                  token:
+                    type: string
+              example:
+                message: "Sucessfully logged in."
+                token: "jwt_token_here"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                "Wrong content type":
+                  $ref: "#/components/examples/WrongContentType"
+                "Invalid JSON":
+                  $ref: "#/components/examples/InvalidJSON"
+                "Missing fields":
+                  value:
+                    error: "Request body must contain username and password fields"
+
+        '401':
+          description: Invalid login credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Invalid username or password"
+
+  /users/validate:
+    post:
+      tags:
+        - users
+      summary: Validate JWT token.
+      description: Validate a JWT token and return decoded token claims.
+      operationId: validateToken
+
+      requestBody:
+        required: true
+        description: Token to validate
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+            example:
+              token: "jwt_token_here"
+
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                "Wrong content type":
+                  $ref: "#/components/examples/WrongContentType"
+                "Invalid JSON":
+                  $ref: "#/components/examples/InvalidJSON"
+                "Missing token":
+                  value:
+                    error: "Request body must contain token field"
+
+        '401':
+          description: Token is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Provided token is not valid"
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          examples: [1]
+        username:
+          type: string
+          examples: [John]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    RegistrationData:
+      type: object
+      properties:
+        username:
+          type: string
+          examples: [John]
+        password:
+          type: string
+          examples: [securepassword]
+
+  examples:
+    WrongContentType:
+      value:
+        error: "Expecting JSON content type"
+
+    InvalidJSON:
+      value:
+        error: "Invalid JSON in request body"
