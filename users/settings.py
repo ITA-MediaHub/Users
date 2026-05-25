@@ -29,7 +29,7 @@ SECRET_KEY = environ["DJANGO_SECRET_KEY"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = environ["DEBUG"].lower() == "true"
 
-ALLOWED_HOSTS = ['.localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
